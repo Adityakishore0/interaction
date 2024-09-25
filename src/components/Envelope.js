@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import './Envelope.css';
-import askImage from '../files/askimage.jpg';
+
+// Lazy load the videos to improve performance
+const SadVideo = lazy(() => import('../files/sad.mp4'));
+const HappyVideo = lazy(() => import('../files/happy.mp4'));
+const AskVideo = lazy(() => import('../files/ask.mp4'));
 
 const Envelope = () => {
   const [showButton, setShowButton] = useState(false);
@@ -11,6 +15,14 @@ const Envelope = () => {
   const [showConfirmNo, setShowConfirmNo] = useState(false);
   const [showSadVideo, setShowSadVideo] = useState(false);
   const [showHappyVideo, setShowHappyVideo] = useState(false); // State for happy video
+
+  useEffect(() => {
+    const preloadImages = () => {
+      const askImage = new Image();
+      askImage.src = require('../files/askimage.jpg');
+    };
+    preloadImages();
+  }, []);
 
   const handleEnvelopeClick = () => {
     const envelopeWrapper = document.querySelector('.envelope-wrapper');
@@ -44,24 +56,23 @@ const Envelope = () => {
     if (response === 'No') {
       setShowConfirmNo(true);
     } else if (response === 'Yes') {
-      // Show happy video and hide everything else
-      setShowHappyVideo(true); // Show happy video
-      setShowConfirmNo(false); // Hide confirm question
-      setShowQuestion(false); // Hide the first question
-      setShowVideo(false); // Stop previous video
-      setShowButton(false); // Hide button
+      setShowHappyVideo(true);
+      setShowConfirmNo(false);
+      setShowQuestion(false);
+      setShowVideo(false);
+      setShowButton(false);
     } else if (response === 'Confirm No') {
-      setShowSadVideo(true); // Show sad video
-      setShowConfirmNo(false); // Hide confirm question
-      setShowQuestion(false); // Hide initial question
-      setShowVideo(false); // Stop previous video
-      setShowButton(false); // Hide button
+      setShowSadVideo(true);
+      setShowConfirmNo(false);
+      setShowQuestion(false);
+      setShowVideo(false);
+      setShowButton(false);
     }
   };
 
   const handleBackToFirstQuestion = () => {
-    setShowConfirmNo(false); // Hide confirm question
-    setShowQuestion(true); // Show the first question again
+    setShowConfirmNo(false);
+    setShowQuestion(true);
   };
 
   return (
@@ -73,7 +84,11 @@ const Envelope = () => {
               <div className='envelope-wrapper' onClick={handleEnvelopeClick}>
                 <div className='envelope'>
                   <div className='letter'>
-                    <img src={askImage} alt='Ask' style={{ width: '100%', height: 'auto' }} />
+                    <img
+                      src={require('../files/askimage.jpg')}
+                      alt='Ask'
+                      style={{ width: '100%', height: 'auto' }}
+                    />
                   </div>
                 </div>
                 <div className='heart'></div>
@@ -86,16 +101,9 @@ const Envelope = () => {
             </>
           ) : (
             <>
-              <video
-                autoPlay
-                
-                className="background-video"
-                onEnded={handleVideoEnded}
-                controls={false}
-              >
-                <source src={require('../files/ask.mp4')} type="video/mp4" />
-                Your browser does not support the video tag.
-              </video>
+              <Suspense fallback={<div>Loading video...</div>}>
+                <AskVideo />
+              </Suspense>
               {showQuestion && !showConfirmNo && (
                 <div className="question-overlay">
                   <p>Do you want to go out with me?</p>
@@ -120,15 +128,9 @@ const Envelope = () => {
           )}
         </>
       ) : (
-        <video
-          autoPlay
-         
-          className="background-video"
-          controls={false}
-        >
-          <source src={showSadVideo ? require('../files/sad.mp4') : require('../files/happy.mp4')} type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
+        <Suspense fallback={<div>Loading video...</div>}>
+          {showSadVideo ? <SadVideo /> : <HappyVideo />}
+        </Suspense>
       )}
     </div>
   );
