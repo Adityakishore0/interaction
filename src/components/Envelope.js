@@ -44,8 +44,8 @@ const Envelope = () => {
   const handleNoHover = () => {
     if (noHoverCount < 4) {
       const newPosition = {
-        top: `${Math.random() * 80 + 10}%`,
-        left: `${Math.random() * 80 + 10}%`,
+        top: `${Math.random() * 40 + 70}%`,
+        left: `${Math.random() * 40 + 90}%`,
       };
       setNoPosition(newPosition);
       setNoHoverCount(prevCount => prevCount + 1);
